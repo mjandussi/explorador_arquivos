@@ -252,7 +252,7 @@ def exibir_graficos():
 
     st.divider()
 
-    st.subheader("Cálculo Dinâmico de Intervalos de Faixas")
+    st.subheader("Cálculo Dinâmico de Intervalos de Faixas e Gráfico de Barras")
     selected_bin_column = st.selectbox("Selecione a coluna para calcular as faixas", df.columns.tolist(), key="bin_column")
     
     if 'faixas' not in st.session_state:
@@ -422,9 +422,8 @@ def exibir_graficos():
 
     st.subheader("Heatmap")
     colunas_selecionadas = []
-    for coluna in df_numericas.columns:
-        if st.checkbox(coluna, value=True):
-            colunas_selecionadas.append(coluna)
+    colunas_selecionadas  = st.multiselect("Colunas", options=df_numericas.columns.tolist())
+            
 
     # Verifica se há colunas selecionadas
     if colunas_selecionadas:
@@ -438,6 +437,10 @@ def exibir_graficos():
     else:
         st.warning("Por favor, selecione pelo menos uma coluna para gerar o heatmap.")
 
+    
+    st.divider()
+    if st.button("Obrigado!!"):
+            st.balloons()
 
 ###########################################################################################################################################
 ###########################################################################################################################################
@@ -446,7 +449,7 @@ def exibir_graficos():
 ###########################################################################################################################################
 
 # Navegação entre páginas
-page = st.sidebar.radio("Páginas", ["Edição do Arquivo", "Análises Estatísticas e Gráficos"])
+page = st.sidebar.radio("PÁGINAS", ["Edição do Arquivo", "Análises Estatísticas e Gráficos"])
 
 # Carregar o DataFrame
 if uploaded_file is not None:
@@ -458,5 +461,13 @@ if uploaded_file is not None:
             editar_dataframe()
         elif page == "Análises Estatísticas e Gráficos":
             exibir_graficos()
+  
 else:
     st.info("Por favor, carregue um arquivo CSV para começar.")
+
+
+st.sidebar.divider()
+
+st.sidebar.header("Contato")
+st.sidebar.info("mjandussi@gmail.com")
+st.sidebar.text("Mantido por Marcelo Jandussi")
