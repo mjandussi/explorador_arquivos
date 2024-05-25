@@ -381,7 +381,7 @@ def show_analysis():
 
     st.divider()
 
-    st.subheader("ANÁLISE BIVARIADA - BOXPLOTS (variável quantitativa ~ variável qualitativa)")
+    st.subheader("Análise Bivariada - Boxplot (variável quantitativa / variável qualitativa)")
 
     all_columns = df.columns.tolist()
     coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", all_columns)
