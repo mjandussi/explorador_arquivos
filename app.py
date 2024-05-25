@@ -18,7 +18,7 @@ hide_st_style = """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 html_temp = """
-<div style="background-color:blue;"><p style="color:white;font-size:50px;padding:10px">Explorador de Arquivos</p></div>
+<div style="background-color:tomato;"><p style="color:white;font-size:50px;padding:10px">Explorador de Arquivos</p></div>
 """
 st.markdown(html_temp, unsafe_allow_html=True)
 
@@ -65,7 +65,7 @@ def edit_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Float
-    st.subheader("Seleção de Colunas para Alterar Tipo de Dados para Float (número decimal)")
+    st.subheader("Alterar Tipo de Dados para Float (número decimal)")
     columns_to_convert = st.multiselect("Selecione as colunas que deseja converter para número decimal", df.columns.tolist())
     
     if columns_to_convert:
@@ -80,7 +80,7 @@ def edit_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Texto
-    st.subheader("Seleção de Colunas para Alterar Tipo de Dados para Texto")
+    st.subheader("Alterar Tipo de Dados para Texto")
     columns_to_convert_texto = st.multiselect("Selecione as colunas que deseja converter para texto", df.columns.tolist())
     
     if columns_to_convert_texto:
@@ -94,7 +94,7 @@ def edit_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Inteiro
-    st.subheader("Seleção de Colunas para Alterar Tipo de Dados para Inteiro (número decimal)")
+    st.subheader("Alterar Tipo de Dados para Inteiro (número decimal)")
     columns_to_convert_inteiro = st.multiselect("Selecione as colunas que deseja converter para número inteiro", df.columns.tolist())
     
     if columns_to_convert_inteiro:
