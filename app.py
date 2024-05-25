@@ -27,7 +27,7 @@ st.subheader("Análise Estatística de Arquivos CSV com Streamlit")
 uploaded_file = st.file_uploader("Escolha um arquivo CSV", type="csv")
 
 # Função para carregar e processar o DataFrame
-def load_data(file):
+def ler_data(file):
     # Tentar ler o arquivo CSV com diferentes codificações
     encodings = ['utf-8', 'latin1', 'cp1252']
     for encoding in encodings:
@@ -47,7 +47,7 @@ def load_data(file):
 ###########################################################################################################################################
 
 # Função para exibir e editar o DataFrame
-def edit_dataframe():
+def editar_dataframe():
     df = st.session_state.df
     if st.checkbox("Mostrar os dados"):
         number = st.number_input("Número de Linhas para Visualizar", min_value=1, max_value=len(df), value=5)
@@ -133,7 +133,7 @@ def edit_dataframe():
 ###########################################################################################################################################
 
 # Função para exibir gráficos e análises estatísticas
-def show_analysis():
+def exibir_graficos():
     df = st.session_state.df
     # Exibir informações adicionais sobre o DataFrame
     st.subheader("Número de Linhas e Colunas:")
@@ -148,8 +148,10 @@ def show_analysis():
     
     st.divider()
 
-    # Cálculo de Métricas Estatísticas
+    # Criando o DF de apenas colunas numericas
     df_numericas = df.select_dtypes(include=['number'])
+
+    # Cálculo de Métricas Estatísticas
     st.subheader("Métricas Estatísticas")
     if st.checkbox("Mostrar Métricas Estatísticas", key="show_metrics"):
         for coluna in df_numericas.columns:
@@ -335,9 +337,9 @@ def show_analysis():
 
 
     st.divider()
-    
+
     st.subheader("Boxplot Personalizado")
-    selected_boxplot_column = st.selectbox("Selecione a coluna para o boxplot", df.columns.tolist(), key="boxplot_column")
+    selected_boxplot_column = st.selectbox("Selecione a coluna para o boxplot", df_numericas.columns.tolist(), key="boxplot_column")
     
     if st.button("Gerar Boxplot", key="generate_boxplot"):
         st.success(f"Gerando boxplot para a coluna {selected_boxplot_column}")
@@ -345,9 +347,9 @@ def show_analysis():
         sns.set(style="whitegrid")
         
         fig, ax = plt.subplots(figsize=(7, 4))
-        sns.boxplot(data=df[selected_boxplot_column], orient="h", color="lightcoral", ax=ax)
+        sns.boxplot(data=df_numericas[selected_boxplot_column], orient="h", color="lightcoral", ax=ax)
         
-        mean_value = df[selected_boxplot_column].mean()
+        mean_value = df_numericas[selected_boxplot_column].mean()
         ax.axvline(mean_value, color='red', linestyle='--', linewidth=2.5, label=f'Média: {mean_value:.2f}')
         
         plt.title(f'Boxplot da {selected_boxplot_column}', fontsize=20)
@@ -387,13 +389,16 @@ def show_analysis():
 
     st.subheader("Análise Bivariada - Boxplot (variável quantitativa / variável qualitativa)")
 
+    # Seleção das colunas para os gráficos
     all_columns = df.columns.tolist()
     coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", all_columns)
     coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", all_columns)
     coluna_x2 = st.selectbox("Selecione a coluna X para o segundo gráfico", all_columns)
     coluna_y2 = st.selectbox("Selecione a coluna Y para o segundo gráfico", all_columns)
 
+    # Verificar se as colunas foram selecionadas
     if coluna_x1 and coluna_y1 and coluna_x2 and coluna_y2:
+        # Configurando o layout para 1 linha e 2 colunas de gráficos
         fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
         # Primeiro boxplot
@@ -427,12 +432,12 @@ page = st.sidebar.radio("Páginas", ["Edição do Arquivo", "Análises Estatíst
 # Carregar o DataFrame
 if uploaded_file is not None:
     if 'df' not in st.session_state:
-        st.session_state.df = load_data(uploaded_file)
+        st.session_state.df = ler_data(uploaded_file)
     
     if st.session_state.df is not None:
         if page == "Edição do Arquivo":
-            edit_dataframe()
+            editar_dataframe()
         elif page == "Análises Estatísticas e Gráficos":
-            show_analysis()
+            exibir_graficos()
 else:
     st.info("Por favor, carregue um arquivo CSV para começar.")
