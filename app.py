@@ -344,8 +344,6 @@ def exibir_graficos():
     if st.button("Gerar Boxplot", key="generate_boxplot"):
         st.success(f"Gerando boxplot para a coluna {selected_boxplot_column}")
         
-        sns.set(style="whitegrid")
-        
         fig, ax = plt.subplots(figsize=(7, 4))
         sns.boxplot(data=df_numericas[selected_boxplot_column], orient="h", color="lightcoral", ax=ax)
         
@@ -418,6 +416,27 @@ def exibir_graficos():
 
         # Exibir os gráficos no Streamlit
         st.pyplot(fig)
+
+
+    st.divider()
+
+    st.subheader("Heatmap")
+    colunas_selecionadas = []
+    for coluna in df_numericas.columns:
+        if st.checkbox(coluna, value=True):
+            colunas_selecionadas.append(coluna)
+
+    # Verifica se há colunas selecionadas
+    if colunas_selecionadas:
+        df_selecionado = df_numericas[colunas_selecionadas]
+
+        # Gera o heatmap
+        st.header("Mapa de Calor das Correlações")
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(df_selecionado.corr(), annot=True, fmt=".2f", cmap='coolwarm', cbar=True)
+        st.pyplot(plt.gcf())
+    else:
+        st.warning("Por favor, selecione pelo menos uma coluna para gerar o heatmap.")
 
 
 ###########################################################################################################################################
