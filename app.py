@@ -310,6 +310,7 @@ def show_analysis():
     st.divider()
 
     st.subheader("Tabela de Frequência Cruzada")
+    st.subheader("Tabela de Frequência Cruzada")
     cola, colb = st.columns(2)
     
     with cola:
@@ -332,6 +333,9 @@ def show_analysis():
         tabela_proporcao_linhas = pd.crosstab(df[col1], df[col2], normalize='index')
         st.write(tabela_proporcao_linhas)
 
+
+    st.divider()
+    
     st.subheader("Boxplot Personalizado")
     selected_boxplot_column = st.selectbox("Selecione a coluna para o boxplot", df.columns.tolist(), key="boxplot_column")
     
