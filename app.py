@@ -138,7 +138,7 @@ def exibir_graficos():
 
      # Criando o DF de apenas colunas numericas
     df_numericas = df.select_dtypes(include=['number'])
-    all_columns = df_numericas.columns.tolist()
+    df_numericas_a =  df_numericas.copy()
 
 
     # Exibir informações adicionais sobre o DataFrame
@@ -157,24 +157,24 @@ def exibir_graficos():
     # Cálculo de Métricas Estatísticas
     st.subheader("Métricas Estatísticas")
     if st.checkbox("Mostrar Métricas Estatísticas", key="show_metrics"):
-        for coluna in df_numericas.columns:
-            media = df_numericas[coluna].mean()
-            mediana = df_numericas[coluna].median()
-            desvio_padrao = df_numericas[coluna].std()
+        for coluna in df_numericas_a.columns:
+            media = df_numericas_a[coluna].mean()
+            mediana = df_numericas_a[coluna].median()
+            desvio_padrao = df_numericas_a[coluna].std()
             coef_variação = desvio_padrao / media if media != 0 else np.nan
 
-            Q1 = df_numericas[coluna].quantile(0.25)
-            Q3 = df_numericas[coluna].quantile(0.75)
+            Q1 = df_numericas_a[coluna].quantile(0.25)
+            Q3 = df_numericas_a[coluna].quantile(0.75)
             IQR = Q3 - Q1
 
-            df_numericas.loc['média', coluna] = media
-            df_numericas.loc['mediana', coluna] = mediana
-            df_numericas.loc['desvio padrão', coluna] = desvio_padrao
-            df_numericas.loc['coeficiente de variação', coluna] = coef_variação
-            df_numericas.loc['distância interquartílica', coluna] = IQR
+            df_numericas_a.loc['média', coluna] = media
+            df_numericas_a.loc['mediana', coluna] = mediana
+            df_numericas_a.loc['desvio padrão', coluna] = desvio_padrao
+            df_numericas_a.loc['coeficiente de variação', coluna] = coef_variação
+            df_numericas_a.loc['distância interquartílica', coluna] = IQR
 
         st.write("Métricas Estatísticas: 'média', 'mediana', 'desvio padrão', 'coeficiente de variação e distância interquartílica")
-        st.dataframe(df_numericas.tail(5))
+        st.dataframe(df_numericas_a.tail(5))
 
     st.divider()
 
@@ -187,25 +187,6 @@ def exibir_graficos():
         st.warning("Nenhuma coluna selecionada.")
 
 
-    
-    # st.subheader("Análise de Colunas")
-    # if st.checkbox("Selecione Colunas para visualizar"):
-    #     all_columns = df.columns.tolist()
-    #     selected_columns = st.multiselect("Selecione", all_columns)
-        
-    #     if selected_columns:
-    #         new_df = df[selected_columns]
-    #         st.dataframe(new_df)
-
-    #         st.subheader("Contagem de Valores")
-    #         st.text("Contagem de Valores da última coluna escolhida")
-            
-    #         if not new_df.empty:
-    #             st.write(new_df.iloc[:, -1].value_counts())
-    #         else:
-    #             st.warning("Nenhuma coluna selecionada.")
-    #     else:
-    #         st.warning("Por favor, selecione pelo menos uma coluna.")
 
 
     st.divider()
