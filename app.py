@@ -103,6 +103,19 @@ def editar_dataframe():
             st.success(f"Colunas {columns_to_convert_inteiro} convertidas para inteiro com sucesso!")
         except ValueError as e:
             st.error(f"Erro ao converter colunas: {e}")
+
+    st.divider()
+    
+    # Seleção de colunas para alterar o tipo de dados para Data
+    st.subheader("Alterar Tipo de Dados para Data")
+    columns_to_convert_data = st.multiselect("Selecione as colunas que deseja converter para data", df.columns.tolist())
+    
+    if columns_to_convert_data:
+        try:
+            df[columns_to_convert_data] = df[columns_to_convert_data].apply(pd.to_datetime)
+            st.success(f"Colunas {columns_to_convert_data} convertidas para data com sucesso!")
+        except Exception as e:
+            st.error(f"Erro ao converter colunas: {e}")
     
 
     st.divider()
@@ -118,11 +131,24 @@ def editar_dataframe():
             st.success(f"Nova coluna '{new_col_extract_name}' criada com os primeiros dígitos de '{col_to_extract}'!")
         except Exception as e:
             st.error(f"Erro ao extrair os primeiros dígitos: {e}")
-    
-    # if st.checkbox("Mostrar os dados após criação da nova coluna"):
-    #     number = st.number_input("Número de Linhas para Visualizar", min_value=1, max_value=len(df), value=5, key='new_col')
-    #     st.dataframe(df.head(number))
 
+
+    st.divider()
+
+    st.subheader("Extrair os Últimos Dígitos de uma Coluna")
+    col_to_extract_last = st.selectbox("Selecione a Coluna para Extrair os Últimos Dígitos", df.columns.tolist(), key="last_digits_col")
+    new_col_extract_last_name = st.text_input("Nome da Nova Coluna para os Últimos Dígitos", key="last_digits_col_name")
+    cut_value_last = st.number_input("Valor de Corte para os Últimos Dígitos", value=2, key="last_digits_cut_value")
+    
+    if st.button("Extrair Últimos Dígitos"):
+        try:
+            df[new_col_extract_last_name] = df[col_to_extract_last].astype(str).str.slice(-cut_value_last)
+            st.success(f"Nova coluna '{new_col_extract_last_name}' criada com os últimos dígitos de '{col_to_extract_last}'!")
+        except Exception as e:
+            st.error(f"Erro ao extrair os últimos dígitos: {e}")
+
+    
+    
     # Atualiza o DataFrame no session_state
     st.session_state.df = df
 
