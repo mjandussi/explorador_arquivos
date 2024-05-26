@@ -119,9 +119,9 @@ def editar_dataframe():
         except Exception as e:
             st.error(f"Erro ao extrair os primeiros dígitos: {e}")
     
-    if st.checkbox("Mostrar os dados após criação da nova coluna"):
-        number = st.number_input("Número de Linhas para Visualizar", min_value=1, max_value=len(df), value=5, key='new_col')
-        st.dataframe(df.head(number))
+    # if st.checkbox("Mostrar os dados após criação da nova coluna"):
+    #     number = st.number_input("Número de Linhas para Visualizar", min_value=1, max_value=len(df), value=5, key='new_col')
+    #     st.dataframe(df.head(number))
 
     # Atualiza o DataFrame no session_state
     st.session_state.df = df
