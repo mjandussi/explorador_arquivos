@@ -260,7 +260,7 @@ def exibir_graficos():
     if 'frequencia_faixas' not in st.session_state:
         st.session_state['frequencia_faixas'] = None
 
-    step = st.number_input("Defina o intervalo de cada faixa para sua coluna", min_value=0, value=10)
+    step = st.number_input("Defina o intervalo de cada faixa para sua coluna", min_value=1, value=10)
 
     if st.button("Calcular Faixas", key="calculate_bins"):
         st.success(f"Calculando faixas para a coluna {selected_bin_column}")    
@@ -307,6 +307,7 @@ def exibir_graficos():
 
         plt.tight_layout()
         st.pyplot(fig)
+
 
 
     st.divider()
@@ -437,9 +438,9 @@ def exibir_graficos():
         st.warning("Por favor, selecione pelo menos uma coluna para gerar o heatmap.")
 
     
-    st.divider()
-    if st.button("Obrigado!!"):
-            st.balloons()
+    # st.divider()
+    # if st.button("Obrigado!!"):
+    #         st.balloons()
 
 ###########################################################################################################################################
 ###########################################################################################################################################
