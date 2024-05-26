@@ -354,21 +354,21 @@ def exibir_graficos():
 
 
     st.divider()
-
+    df_numericas3 = df_numericas.copy()
     st.subheader("Gráfico de Dispersão com Linha de Tendência")
     colc, cold = st.columns(2)
     
     with colc:
-        x_col = st.selectbox("Selecione a coluna para o eixo X", df_numericas.columns.tolist(), key="scatter_x_col")
+        x_col = st.selectbox("Selecione a coluna para o eixo X", df_numericas3.columns.tolist(), key="scatter_x_col")
     
     with cold:
-        y_col = st.selectbox("Selecione a coluna para o eixo Y", df_numericas.columns.tolist(), key="scatter_y_col")
+        y_col = st.selectbox("Selecione a coluna para o eixo Y", df_numericas3.columns.tolist(), key="scatter_y_col")
     
     if st.button("Gerar Gráfico de Dispersão", key="generate_scatter_plot"):
         st.success(f"Gerando gráfico de dispersão para {x_col} e {y_col}")
         
         fig, ax = plt.subplots(figsize=(10, 6))
-        sns.regplot(x=x_col, y=y_col, data=df_numericas, scatter_kws={'s': 50}, line_kws={"color": "red"}, ax=ax)
+        sns.regplot(x=x_col, y=y_col, data=df_numericas3, scatter_kws={'s': 50}, line_kws={"color": "red"}, ax=ax)
         
         plt.title(f'Diagrama de Dispersão entre {x_col} e {y_col} com Linha de Tendência')
         plt.xlabel(x_col)
