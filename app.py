@@ -135,6 +135,12 @@ def editar_dataframe():
 # Função para exibir gráficos e análises estatísticas
 def exibir_graficos():
     df = st.session_state.df
+
+     # Criando o DF de apenas colunas numericas
+    df_numericas = df.select_dtypes(include=['number'])
+    all_columns = df_numericas.columns.tolist()
+
+    
     # Exibir informações adicionais sobre o DataFrame
     st.subheader("Número de Linhas e Colunas:")
     if st.checkbox("Número de Linhas e Colunas"):
@@ -147,9 +153,6 @@ def exibir_graficos():
         st.write(df.describe())
     
     st.divider()
-
-    # Criando o DF de apenas colunas numericas
-    df_numericas = df.select_dtypes(include=['number'])
 
     # Cálculo de Métricas Estatísticas
     st.subheader("Métricas Estatísticas")
@@ -175,16 +178,13 @@ def exibir_graficos():
 
     st.divider()
 
-    st.subheader("Análise de Colunas")
-    if st.checkbox("Selecione Colunas para visualizar"):
-        todas_colunas = df.columns.tolist()
-        selected_columns = st.multiselect("Selecione", todas_colunas)
-        
-        if selected_columns:
-            new_df = df[selected_columns]
-            st.write(new_df.value_counts())
-        else:
-            st.warning("Nenhuma coluna selecionada.")
+    st.subheader("Análise de Contagem de Valores por Coluna")
+    selected_columns = st.multiselect("Selecione a Coluna", df.columns.tolist())
+    if selected_columns:
+        new_df = df[selected_columns]
+        st.write(new_df.value_counts())
+    else:
+        st.warning("Nenhuma coluna selecionada.")
 
 
     
