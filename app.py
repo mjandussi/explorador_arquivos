@@ -177,22 +177,35 @@ def exibir_graficos():
 
     st.subheader("Análise de Colunas")
     if st.checkbox("Selecione Colunas para visualizar"):
-        all_columns = df.columns.tolist()
-        selected_columns = st.multiselect("Selecione", all_columns)
+        todas_colunas = df.columns.tolist()
+        selected_columns = st.multiselect("Selecione", todas_colunas)
         
         if selected_columns:
             new_df = df[selected_columns]
-            st.dataframe(new_df)
-
-            st.subheader("Contagem de Valores")
-            st.text("Contagem de Valores da última coluna escolhida")
-            
-            if not new_df.empty:
-                st.write(new_df.iloc[:, -1].value_counts())
-            else:
-                st.warning("Nenhuma coluna selecionada.")
+            st.write(new_df.value_counts())
         else:
-            st.warning("Por favor, selecione pelo menos uma coluna.")
+            st.warning("Nenhuma coluna selecionada.")
+
+
+    
+    # st.subheader("Análise de Colunas")
+    # if st.checkbox("Selecione Colunas para visualizar"):
+    #     all_columns = df.columns.tolist()
+    #     selected_columns = st.multiselect("Selecione", all_columns)
+        
+    #     if selected_columns:
+    #         new_df = df[selected_columns]
+    #         st.dataframe(new_df)
+
+    #         st.subheader("Contagem de Valores")
+    #         st.text("Contagem de Valores da última coluna escolhida")
+            
+    #         if not new_df.empty:
+    #             st.write(new_df.iloc[:, -1].value_counts())
+    #         else:
+    #             st.warning("Nenhuma coluna selecionada.")
+    #     else:
+    #         st.warning("Por favor, selecione pelo menos uma coluna.")
 
 
     st.divider()
