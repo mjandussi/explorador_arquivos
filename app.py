@@ -334,18 +334,19 @@ def exibir_graficos():
     with colb:
         col2 = st.selectbox("Selecione a segunda coluna", df.columns.tolist(), key="cross_tab_col2")
     
+    df2 = df.copy()
     if st.button("Gerar Tabela de Frequência Cruzada", key="generate_cross_tab"):
         st.success(f"Gerando tabela de frequência cruzada para {col1} e {col2}")
         st.write("Proporção com Totais")
-        tabela_frequencias = pd.crosstab(df[col1], df[col2], margins=True, margins_name="Total")
+        tabela_frequencias = pd.crosstab(df2[col1], df2[col2], margins=True, margins_name="Total")
         st.write(tabela_frequencias)
         st.divider()
         st.write("Proporção Percentual")
-        tabela_proporcao = pd.crosstab(df[col1], df[col2], normalize='all')
+        tabela_proporcao = pd.crosstab(df2[col1], df2[col2], normalize='all')
         st.write(tabela_proporcao)
         st.divider()
         st.write("Proporção Percentual por linhas")
-        tabela_proporcao_linhas = pd.crosstab(df[col1], df[col2], normalize='index')
+        tabela_proporcao_linhas = pd.crosstab(df2[col1], df2[col2], normalize='index')
         st.write(tabela_proporcao_linhas)
 
 
@@ -401,11 +402,11 @@ def exibir_graficos():
     st.subheader("Análise Bivariada - Boxplot (variável quantitativa / variável qualitativa)")
 
     # Seleção das colunas para os gráficos
-    all_columns = df.columns.tolist()
-    coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", all_columns)
-    coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", all_columns)
-    coluna_x2 = st.selectbox("Selecione a coluna X para o segundo gráfico", all_columns)
-    coluna_y2 = st.selectbox("Selecione a coluna Y para o segundo gráfico", all_columns)
+    df1 = df.copy()
+    coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", df1.columns.tolist())
+    coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", df1.columns.tolist())
+    coluna_x2 = st.selectbox("Selecione a coluna X para o segundo gráfico", df1.columns.tolist())
+    coluna_y2 = st.selectbox("Selecione a coluna Y para o segundo gráfico", df1.columns.tolist())
 
     # Verificar se as colunas foram selecionadas
     if coluna_x1 and coluna_y1 and coluna_x2 and coluna_y2:
