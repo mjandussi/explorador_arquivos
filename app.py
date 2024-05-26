@@ -312,7 +312,6 @@ def exibir_graficos():
     st.divider()
 
     st.subheader("Tabela de Frequência Cruzada")
-    st.subheader("Tabela de Frequência Cruzada")
     cola, colb = st.columns(2)
     
     with cola:
