@@ -245,9 +245,9 @@ def exibir_graficos():
 
 
     st.divider()
-
+    df_numericas_2 = df_numericas.copy()
     st.subheader("Cálculo Dinâmico de Intervalos de Faixas e Gráfico de Barras")
-    selected_bin_column = st.selectbox("Selecione a coluna para calcular as faixas", df_numericas.columns.tolist(), key="bin_column")
+    selected_bin_column = st.selectbox("Selecione a coluna para calcular as faixas", df_numericas_2.columns.tolist(), key="bin_column")
     
     if 'faixas' not in st.session_state:
         st.session_state['faixas'] = None
@@ -258,7 +258,6 @@ def exibir_graficos():
 
     if st.button("Calcular Faixas", key="calculate_bins"):
         st.success(f"Calculando faixas para a coluna {selected_bin_column}")    
-        df_numericas_2 = df_numericas.copy()
         min_val = df_numericas_2[selected_bin_column].min()
         max_val = df_numericas_2[selected_bin_column].max()
         faixas = list(range(int(min_val), int(max_val) + step, step))
@@ -306,16 +305,16 @@ def exibir_graficos():
 
     st.divider()
 
+    df2 = df.copy()
     st.subheader("Tabela de Frequência Cruzada")
     cola, colb = st.columns(2)
     
     with cola:
-        col1 = st.selectbox("Selecione a primeira coluna", df.columns.tolist(), key="cross_tab_col1")
+        col1 = st.selectbox("Selecione a primeira coluna", df2.columns.tolist(), key="cross_tab_col1")
     
     with colb:
-        col2 = st.selectbox("Selecione a segunda coluna", df.columns.tolist(), key="cross_tab_col2")
+        col2 = st.selectbox("Selecione a segunda coluna", df2.columns.tolist(), key="cross_tab_col2")
     
-    df2 = df.copy()
     if st.button("Gerar Tabela de Frequência Cruzada", key="generate_cross_tab"):
         st.success(f"Gerando tabela de frequência cruzada para {col1} e {col2}")
         st.write("Proporção com Totais")
