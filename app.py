@@ -94,7 +94,7 @@ def editar_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Inteiro
-    st.subheader("Alterar Tipo de Dados para Inteiro (número decimal)")
+    st.subheader("Alterar Tipo de Dados para Inteiro (número inteiro)")
     columns_to_convert_inteiro = st.multiselect("Selecione as colunas que deseja converter para número inteiro", df.columns.tolist())
     
     if columns_to_convert_inteiro:
@@ -140,7 +140,7 @@ def exibir_graficos():
     df_numericas = df.select_dtypes(include=['number'])
     all_columns = df_numericas.columns.tolist()
 
-    
+
     # Exibir informações adicionais sobre o DataFrame
     st.subheader("Número de Linhas e Colunas:")
     if st.checkbox("Número de Linhas e Colunas"):
@@ -277,15 +277,15 @@ def exibir_graficos():
 
     if st.button("Calcular Faixas", key="calculate_bins"):
         st.success(f"Calculando faixas para a coluna {selected_bin_column}")    
-        
-        min_val = df_numericas[selected_bin_column].min()
-        max_val = df_numericas[selected_bin_column].max()
+        df_numericas_2 = df_numericas.copy()
+        min_val = df_numericas_2[selected_bin_column].min()
+        max_val = df_numericas_2[selected_bin_column].max()
         faixas = list(range(int(min_val), int(max_val) + step, step))
         
         faixa_col_name = f"Faixa_{selected_bin_column}"
-        df_numericas[faixa_col_name] = pd.cut(df_numericas[selected_bin_column], bins=faixas, right=False, include_lowest=True)
+        df_numericas_2[faixa_col_name] = pd.cut(df_numericas_2[selected_bin_column], bins=faixas, right=False, include_lowest=True)
         
-        frequencia_faixas = df_numericas[faixa_col_name].value_counts().sort_index()
+        frequencia_faixas = df_numericas_2[faixa_col_name].value_counts().sort_index()
         
         st.session_state['faixas'] = faixas
         st.session_state['frequencia_faixas'] = frequencia_faixas
