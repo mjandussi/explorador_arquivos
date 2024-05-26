@@ -253,7 +253,7 @@ def exibir_graficos():
     st.divider()
 
     st.subheader("Cálculo Dinâmico de Intervalos de Faixas e Gráfico de Barras")
-    selected_bin_column = st.selectbox("Selecione a coluna para calcular as faixas", df.columns.tolist(), key="bin_column")
+    selected_bin_column = st.selectbox("Selecione a coluna para calcular as faixas", df_numericas.columns.tolist(), key="bin_column")
     
     if 'faixas' not in st.session_state:
         st.session_state['faixas'] = None
@@ -265,14 +265,14 @@ def exibir_graficos():
     if st.button("Calcular Faixas", key="calculate_bins"):
         st.success(f"Calculando faixas para a coluna {selected_bin_column}")    
         
-        min_val = df[selected_bin_column].min()
-        max_val = df[selected_bin_column].max()
+        min_val = df_numericas[selected_bin_column].min()
+        max_val = df_numericas[selected_bin_column].max()
         faixas = list(range(int(min_val), int(max_val) + step, step))
         
         faixa_col_name = f"Faixa_{selected_bin_column}"
-        df[faixa_col_name] = pd.cut(df[selected_bin_column], bins=faixas, right=False, include_lowest=True)
+        df_numericas[faixa_col_name] = pd.cut(df_numericas[selected_bin_column], bins=faixas, right=False, include_lowest=True)
         
-        frequencia_faixas = df[faixa_col_name].value_counts().sort_index()
+        frequencia_faixas = df_numericas[faixa_col_name].value_counts().sort_index()
         
         st.session_state['faixas'] = faixas
         st.session_state['frequencia_faixas'] = frequencia_faixas
