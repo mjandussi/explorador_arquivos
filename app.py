@@ -383,10 +383,10 @@ def exibir_graficos():
 
     # Seleção das colunas para os gráficos
     df1 = df.copy()
-    coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", df1.columns.tolist())
-    coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", df1.columns.tolist())
-    coluna_x2 = st.selectbox("Selecione a coluna X para o segundo gráfico", df1.columns.tolist())
-    coluna_y2 = st.selectbox("Selecione a coluna Y para o segundo gráfico", df1.columns.tolist())
+    coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", df1.columns.tolist(), key="bivariada_x1")
+    coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", df1.columns.tolist(), key="bivariada_y1")
+    coluna_x2 = st.selectbox("Selecione a coluna X para o segundo gráfico", df1.columns.tolist(), key="bivariada_x2")
+    coluna_y2 = st.selectbox("Selecione a coluna Y para o segundo gráfico", df1.columns.tolist(), key="bivariada_y2")
 
     # Verificar se as colunas foram selecionadas
     if coluna_x1 and coluna_y1 and coluna_x2 and coluna_y2:
