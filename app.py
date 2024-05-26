@@ -395,13 +395,13 @@ def exibir_graficos():
         fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
         # Primeiro boxplot
-        sns.boxplot(x=coluna_x1, y=coluna_y1, data=df, ax=axes[0])
+        sns.boxplot(x=coluna_x1, y=coluna_y1, data=df1, ax=axes[0])
         axes[0].set_title(f'Distribuição de {coluna_y1} por {coluna_x1}')
         axes[0].set_xlabel(coluna_x1)
         axes[0].set_ylabel(coluna_y1)
 
         # Segundo boxplot
-        sns.boxplot(x=coluna_x2, y=coluna_y2, data=df, ax=axes[1])
+        sns.boxplot(x=coluna_x2, y=coluna_y2, data=df1, ax=axes[1])
         axes[1].set_title(f'Distribuição de {coluna_y2} por {coluna_x2}')
         axes[1].set_xlabel(coluna_x2)
         axes[1].set_ylabel(coluna_y2)
