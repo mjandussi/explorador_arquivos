@@ -382,6 +382,7 @@ def exibir_graficos():
     st.subheader("Análise Bivariada - Boxplot (variável quantitativa / variável qualitativa)")
 
     # Seleção das colunas para os gráficos
+
     df1 = df.copy()
     coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", df1.columns.tolist(), key="bivariada_x1")
     coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", df1.columns.tolist(), key="bivariada_y1")
@@ -390,26 +391,28 @@ def exibir_graficos():
 
     # Verificar se as colunas foram selecionadas
     if coluna_x1 and coluna_y1 and coluna_x2 and coluna_y2:
-        # Configurando o layout para 1 linha e 2 colunas de gráficos
-        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+        if st.button("Gerar Análise", key="generate_analise"):
+            st.success("Gerando boxplot para a análise")
+            # Configurando o layout para 1 linha e 2 colunas de gráficos
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
-        # Primeiro boxplot
-        sns.boxplot(x=coluna_x1, y=coluna_y1, data=df1, ax=axes[0])
-        axes[0].set_title(f'Distribuição de {coluna_y1} por {coluna_x1}')
-        axes[0].set_xlabel(coluna_x1)
-        axes[0].set_ylabel(coluna_y1)
+            # Primeiro boxplot
+            sns.boxplot(x=coluna_x1, y=coluna_y1, data=df1, ax=axes[0])
+            axes[0].set_title(f'Distribuição de {coluna_y1} por {coluna_x1}')
+            axes[0].set_xlabel(coluna_x1)
+            axes[0].set_ylabel(coluna_y1)
 
-        # Segundo boxplot
-        sns.boxplot(x=coluna_x2, y=coluna_y2, data=df1, ax=axes[1])
-        axes[1].set_title(f'Distribuição de {coluna_y2} por {coluna_x2}')
-        axes[1].set_xlabel(coluna_x2)
-        axes[1].set_ylabel(coluna_y2)
+            # Segundo boxplot
+            sns.boxplot(x=coluna_x2, y=coluna_y2, data=df1, ax=axes[1])
+            axes[1].set_title(f'Distribuição de {coluna_y2} por {coluna_x2}')
+            axes[1].set_xlabel(coluna_x2)
+            axes[1].set_ylabel(coluna_y2)
 
-        # Ajusta automaticamente os subplots para que caibam no layout
-        plt.tight_layout()
+            # Ajusta automaticamente os subplots para que caibam no layout
+            plt.tight_layout()
 
-        # Exibir os gráficos no Streamlit
-        st.pyplot(fig)
+            # Exibir os gráficos no Streamlit
+            st.pyplot(fig)
 
 
     st.divider()
