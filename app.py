@@ -473,18 +473,33 @@ def exibir_graficos():
     colunas_texto = df.select_dtypes(include=['object']).columns.tolist()
 
     # Selecionando as colunas para os valores e rótulos
+    df_numericas = df.select_dtypes(include=['number'])
     s_size_col = st.selectbox("Selecione a coluna para os valores", df_numericas.columns.tolist(), key="treemap_1")
     s_label_col = st.selectbox("Selecione a coluna para as características", colunas_texto, key="treemap_2")
     s_color_col = st.selectbox("Selecione a coluna para as cores", colunas_texto, key="treemap_3")
+
+    # Checkbox para agrupar e somar os valores
+    resumir = st.checkbox("Deseja agrupar e somar os valores pelas colunas escolhidas (resumir os dados)?", key="resumir")
 
     if s_size_col and s_label_col and s_color_col:
         if st.button("Gerar Análise", key="generate_treemap"):
             st.success("Gerando Treemap")
             
             # Obtendo os dados das colunas selecionadas
-            s_size = df[s_size_col].tolist()
-            s_label = df[s_label_col].tolist()
-            s_color = df[s_color_col].tolist()
+            s_size = df[s_size_col]
+            s_label = df[s_label_col]
+            s_color = df[s_color_col]
+            
+            # Agrupando e somando os valores se o checkbox estiver marcado
+            if resumir:
+                df_resumido = df.groupby([s_label_col, s_color_col])[s_size_col].sum().reset_index()
+                s_size = df_resumido[s_size_col].tolist()
+                s_label = df_resumido[s_label_col].tolist()
+                s_color = df_resumido[s_color_col].tolist()
+            else:
+                s_size = s_size.tolist()
+                s_label = s_label.tolist()
+                s_color = s_color.tolist()
             
             # Verificando se a soma dos tamanhos é zero
             if sum(s_size) == 0:
@@ -503,9 +518,8 @@ def exibir_graficos():
 
                 # Adicionando título
                 ax.set_title(f'Distribuição de {s_size_col} por {s_label_col} com cores baseadas em {s_color_col}')
- 
-
-                 # Criando a legenda
+                
+                # Criando a legenda
                 handles = [plt.Rectangle((0, 0), 1, 1, color=color_dict[category]) for category in unique_colors]
                 ax.legend(handles, unique_colors, loc='upper left', bbox_to_anchor=(1, 1))        
 
@@ -514,6 +528,7 @@ def exibir_graficos():
 
                 # Exibindo o gráfico no Streamlit
                 st.pyplot(fig)
+
 
 
     
