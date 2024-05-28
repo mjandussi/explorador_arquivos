@@ -1,1 +1,5 @@
 venv/
+
+# Ignorar arquivos específicos
+teste.py
+back_up.py
