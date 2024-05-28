@@ -503,9 +503,11 @@ def exibir_graficos():
 
                 # Adicionando título
                 ax.set_title(f'Distribuição de {s_size_col} por {s_label_col} com cores baseadas em {s_color_col}')
+ 
 
-                #handles = [plt.Rectangle((0, 0), 1, 1, color=colors[i]) for i in range(len(s_label))]
-                ax.legend(s_label, loc='upper left', bbox_to_anchor=(1, 1))        
+                 # Criando a legenda
+                handles = [plt.Rectangle((0, 0), 1, 1, color=color_dict[category]) for category in unique_colors]
+                ax.legend(handles, unique_colors, loc='upper left', bbox_to_anchor=(1, 1))        
 
                 # Removendo os eixos
                 ax.axis('off')
