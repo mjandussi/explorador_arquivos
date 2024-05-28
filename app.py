@@ -3,6 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import squarify
 
 # Configura para usar o layout amplo
 st.set_page_config(layout="wide")
@@ -65,8 +66,9 @@ def editar_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Float
+    colunas_nao_float = df.select_dtypes(exclude=['float']).columns.tolist()
     st.subheader("Alterar Tipo de Dados para Float (número decimal)")
-    columns_to_convert = st.multiselect("Selecione as colunas que deseja converter para número decimal", df.columns.tolist())
+    columns_to_convert = st.multiselect("Selecione as colunas que deseja converter para número decimal", colunas_nao_float)
     
     if columns_to_convert:
         try:
@@ -80,8 +82,9 @@ def editar_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Texto
+    colunas_nao_texto = df.select_dtypes(exclude=['object']).columns.tolist()
     st.subheader("Alterar Tipo de Dados para Texto")
-    columns_to_convert_texto = st.multiselect("Selecione as colunas que deseja converter para texto", df.columns.tolist())
+    columns_to_convert_texto = st.multiselect("Selecione as colunas que deseja converter para texto", colunas_nao_texto)
     
     if columns_to_convert_texto:
         try:
@@ -94,8 +97,9 @@ def editar_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Inteiro
+    colunas_nao_inteiro = df.select_dtypes(exclude=['int']).columns.tolist()
     st.subheader("Alterar Tipo de Dados para Inteiro (número inteiro)")
-    columns_to_convert_inteiro = st.multiselect("Selecione as colunas que deseja converter para número inteiro", df.columns.tolist())
+    columns_to_convert_inteiro = st.multiselect("Selecione as colunas que deseja converter para número inteiro", colunas_nao_inteiro)
     
     if columns_to_convert_inteiro:
         try:
@@ -107,8 +111,9 @@ def editar_dataframe():
     st.divider()
     
     # Seleção de colunas para alterar o tipo de dados para Data
+    colunas_nao_data = df.select_dtypes(exclude=['datetime']).columns.tolist()
     st.subheader("Alterar Tipo de Dados para Data")
-    columns_to_convert_data = st.multiselect("Selecione as colunas que deseja converter para data", df.columns.tolist())
+    columns_to_convert_data = st.multiselect("Selecione as colunas que deseja converter para data", colunas_nao_data)
     
     if columns_to_convert_data:
         try:
@@ -447,7 +452,6 @@ def exibir_graficos():
     colunas_selecionadas = []
     colunas_selecionadas  = st.multiselect("Colunas", options=df_numericas.columns.tolist())
             
-
     # Verifica se há colunas selecionadas
     if colunas_selecionadas:
         df_selecionado = df_numericas[colunas_selecionadas]
@@ -460,10 +464,57 @@ def exibir_graficos():
     else:
         st.warning("Por favor, selecione pelo menos uma coluna para gerar o heatmap.")
 
+
+    st.divider()
+
+    st.subheader("Treemap")
+
+    # Filtrando colunas de texto
+    colunas_texto = df.select_dtypes(include=['object']).columns.tolist()
+
+    # Selecionando as colunas para os valores e rótulos
+    s_size_col = st.selectbox("Selecione a coluna para os valores", df_numericas.columns.tolist(), key="treemap_1")
+    s_label_col = st.selectbox("Selecione a coluna para as características", colunas_texto, key="treemap_2")
+    s_color_col = st.selectbox("Selecione a coluna para as cores", colunas_texto, key="treemap_3")
+
+    if s_size_col and s_label_col and s_color_col:
+        if st.button("Gerar Análise", key="generate_treemap"):
+            st.success("Gerando Treemap")
+            
+            # Obtendo os dados das colunas selecionadas
+            s_size = df[s_size_col].tolist()
+            s_label = df[s_label_col].tolist()
+            s_color = df[s_color_col].tolist()
+            
+            # Verificando se a soma dos tamanhos é zero
+            if sum(s_size) == 0:
+                st.error("A soma dos valores selecionados é zero. Por favor, selecione uma coluna com valores maiores que zero.")
+            else:
+                # Criando a figura
+                fig, ax = plt.subplots(figsize=(12, 8))
+                
+                # Criando um dicionário de cores para as categorias
+                unique_colors = list(set(s_color))
+                color_dict = {category: plt.cm.tab20(i / len(unique_colors)) for i, category in enumerate(unique_colors)}
+                colors = [color_dict[category] for category in s_color]
+                
+                # Criando o gráfico de treemap
+                squarify.plot(sizes=s_size, label=s_label, alpha=.8, ax=ax, color=colors, text_kwargs={'fontsize':6})
+
+                # Adicionando título
+                ax.set_title(f'Distribuição de {s_size_col} por {s_label_col} com cores baseadas em {s_color_col}')
+
+                # Removendo os eixos
+                ax.axis('off')
+
+                # Exibindo o gráfico no Streamlit
+                st.pyplot(fig)
+
+
     
-    # st.divider()
-    # if st.button("Obrigado!!"):
-    #         st.balloons()
+    st.divider()
+    if st.button("Obrigado!!"):
+            st.balloons()
 
 ###########################################################################################################################################
 ###########################################################################################################################################
