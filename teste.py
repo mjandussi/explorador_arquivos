@@ -3,6 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import squarify
 
 # Configura para usar o layout amplo
 st.set_page_config(layout="wide")
@@ -65,8 +66,9 @@ def editar_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Float
+    colunas_nao_float = df.select_dtypes(exclude=['float']).columns.tolist()
     st.subheader("Alterar Tipo de Dados para Float (número decimal)")
-    columns_to_convert = st.multiselect("Selecione as colunas que deseja converter para número decimal", df.columns.tolist())
+    columns_to_convert = st.multiselect("Selecione as colunas que deseja converter para número decimal", colunas_nao_float)
     
     if columns_to_convert:
         try:
@@ -80,8 +82,9 @@ def editar_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Texto
+    colunas_nao_texto = df.select_dtypes(exclude=['object']).columns.tolist()
     st.subheader("Alterar Tipo de Dados para Texto")
-    columns_to_convert_texto = st.multiselect("Selecione as colunas que deseja converter para texto", df.columns.tolist())
+    columns_to_convert_texto = st.multiselect("Selecione as colunas que deseja converter para texto", colunas_nao_texto)
     
     if columns_to_convert_texto:
         try:
@@ -94,14 +97,29 @@ def editar_dataframe():
     st.divider()
 
     # Seleção de colunas para alterar o tipo de dados para Inteiro
-    st.subheader("Alterar Tipo de Dados para Inteiro (número decimal)")
-    columns_to_convert_inteiro = st.multiselect("Selecione as colunas que deseja converter para número inteiro", df.columns.tolist())
+    colunas_nao_inteiro = df.select_dtypes(exclude=['int']).columns.tolist()
+    st.subheader("Alterar Tipo de Dados para Inteiro (número inteiro)")
+    columns_to_convert_inteiro = st.multiselect("Selecione as colunas que deseja converter para número inteiro", colunas_nao_inteiro)
     
     if columns_to_convert_inteiro:
         try:
             df[columns_to_convert_inteiro] = df[columns_to_convert_inteiro].astype(int)
             st.success(f"Colunas {columns_to_convert_inteiro} convertidas para inteiro com sucesso!")
         except ValueError as e:
+            st.error(f"Erro ao converter colunas: {e}")
+
+    st.divider()
+    
+    # Seleção de colunas para alterar o tipo de dados para Data
+    colunas_nao_data = df.select_dtypes(exclude=['datetime']).columns.tolist()
+    st.subheader("Alterar Tipo de Dados para Data")
+    columns_to_convert_data = st.multiselect("Selecione as colunas que deseja converter para data", colunas_nao_data)
+    
+    if columns_to_convert_data:
+        try:
+            df[columns_to_convert_data] = df[columns_to_convert_data].apply(pd.to_datetime)
+            st.success(f"Colunas {columns_to_convert_data} convertidas para data com sucesso!")
+        except Exception as e:
             st.error(f"Erro ao converter colunas: {e}")
     
 
@@ -118,11 +136,24 @@ def editar_dataframe():
             st.success(f"Nova coluna '{new_col_extract_name}' criada com os primeiros dígitos de '{col_to_extract}'!")
         except Exception as e:
             st.error(f"Erro ao extrair os primeiros dígitos: {e}")
-    
-    # if st.checkbox("Mostrar os dados após criação da nova coluna"):
-    #     number = st.number_input("Número de Linhas para Visualizar", min_value=1, max_value=len(df), value=5, key='new_col')
-    #     st.dataframe(df.head(number))
 
+
+    st.divider()
+
+    st.subheader("Extrair os Últimos Dígitos de uma Coluna")
+    col_to_extract_last = st.selectbox("Selecione a Coluna para Extrair os Últimos Dígitos", df.columns.tolist(), key="last_digits_col")
+    new_col_extract_last_name = st.text_input("Nome da Nova Coluna para os Últimos Dígitos", key="last_digits_col_name")
+    cut_value_last = st.number_input("Valor de Corte para os Últimos Dígitos", value=2, key="last_digits_cut_value")
+    
+    if st.button("Extrair Últimos Dígitos"):
+        try:
+            df[new_col_extract_last_name] = df[col_to_extract_last].astype(str).str.slice(-cut_value_last)
+            st.success(f"Nova coluna '{new_col_extract_last_name}' criada com os últimos dígitos de '{col_to_extract_last}'!")
+        except Exception as e:
+            st.error(f"Erro ao extrair os últimos dígitos: {e}")
+
+    
+    
     # Atualiza o DataFrame no session_state
     st.session_state.df = df
 
@@ -135,6 +166,12 @@ def editar_dataframe():
 # Função para exibir gráficos e análises estatísticas
 def exibir_graficos():
     df = st.session_state.df
+
+     # Criando o DF de apenas colunas numericas
+    df_numericas = df.select_dtypes(include=['number'])
+    df_numericas_a =  df_numericas.copy()
+
+
     # Exibir informações adicionais sobre o DataFrame
     st.subheader("Número de Linhas e Colunas:")
     if st.checkbox("Número de Linhas e Colunas"):
@@ -148,51 +185,39 @@ def exibir_graficos():
     
     st.divider()
 
-    # Criando o DF de apenas colunas numericas
-    df_numericas = df.select_dtypes(include=['number'])
-
     # Cálculo de Métricas Estatísticas
     st.subheader("Métricas Estatísticas")
     if st.checkbox("Mostrar Métricas Estatísticas", key="show_metrics"):
-        for coluna in df_numericas.columns:
-            media = df_numericas[coluna].mean()
-            mediana = df_numericas[coluna].median()
-            desvio_padrao = df_numericas[coluna].std()
+        for coluna in df_numericas_a.columns:
+            media = df_numericas_a[coluna].mean()
+            mediana = df_numericas_a[coluna].median()
+            desvio_padrao = df_numericas_a[coluna].std()
             coef_variação = desvio_padrao / media if media != 0 else np.nan
 
-            Q1 = df_numericas[coluna].quantile(0.25)
-            Q3 = df_numericas[coluna].quantile(0.75)
+            Q1 = df_numericas_a[coluna].quantile(0.25)
+            Q3 = df_numericas_a[coluna].quantile(0.75)
             IQR = Q3 - Q1
 
-            df_numericas.loc['média', coluna] = media
-            df_numericas.loc['mediana', coluna] = mediana
-            df_numericas.loc['desvio padrão', coluna] = desvio_padrao
-            df_numericas.loc['coeficiente de variação', coluna] = coef_variação
-            df_numericas.loc['distância interquartílica', coluna] = IQR
+            df_numericas_a.loc['média', coluna] = media
+            df_numericas_a.loc['mediana', coluna] = mediana
+            df_numericas_a.loc['desvio padrão', coluna] = desvio_padrao
+            df_numericas_a.loc['coeficiente de variação', coluna] = coef_variação
+            df_numericas_a.loc['distância interquartílica', coluna] = IQR
 
         st.write("Métricas Estatísticas: 'média', 'mediana', 'desvio padrão', 'coeficiente de variação e distância interquartílica")
-        st.dataframe(df_numericas.tail(5))
+        st.dataframe(df_numericas_a.tail(5))
 
     st.divider()
 
-    st.subheader("Análise de Colunas")
-    if st.checkbox("Selecione Colunas para visualizar"):
-        all_columns = df.columns.tolist()
-        selected_columns = st.multiselect("Selecione", all_columns)
-        
-        if selected_columns:
-            new_df = df[selected_columns]
-            st.dataframe(new_df)
+    st.subheader("Análise de Contagem de Valores por Coluna")
+    selected_columns = st.multiselect("Selecione a Coluna", df.columns.tolist())
+    if selected_columns:
+        new_df = df[selected_columns]
+        st.write(new_df.value_counts())
+    else:
+        st.warning("Nenhuma coluna selecionada.")
 
-            st.subheader("Contagem de Valores")
-            st.text("Contagem de Valores da última coluna escolhida")
-            
-            if not new_df.empty:
-                st.write(new_df.iloc[:, -1].value_counts())
-            else:
-                st.warning("Nenhuma coluna selecionada.")
-        else:
-            st.warning("Por favor, selecione pelo menos uma coluna.")
+
 
 
     st.divider()
@@ -251,28 +276,27 @@ def exibir_graficos():
 
 
     st.divider()
-
+    df_numericas_2 = df_numericas.copy()
     st.subheader("Cálculo Dinâmico de Intervalos de Faixas e Gráfico de Barras")
-    selected_bin_column = st.selectbox("Selecione a coluna para calcular as faixas", df_numericas.columns.tolist(), key="bin_column")
+    selected_bin_column = st.selectbox("Selecione a coluna para calcular as faixas", df_numericas_2.columns.tolist(), key="bin_column")
     
     if 'faixas' not in st.session_state:
         st.session_state['faixas'] = None
     if 'frequencia_faixas' not in st.session_state:
         st.session_state['frequencia_faixas'] = None
 
-    step = st.number_input("Defina o intervalo de cada faixa para sua coluna", min_value=0, value=10)
+    step = st.number_input("Defina o intervalo de cada faixa para sua coluna", min_value=1, value=10)
 
     if st.button("Calcular Faixas", key="calculate_bins"):
         st.success(f"Calculando faixas para a coluna {selected_bin_column}")    
-        
-        min_val = df_numericas[selected_bin_column].min()
-        max_val = df_numericas[selected_bin_column].max()
+        min_val = df_numericas_2[selected_bin_column].min()
+        max_val = df_numericas_2[selected_bin_column].max()
         faixas = list(range(int(min_val), int(max_val) + step, step))
         
         faixa_col_name = f"Faixa_{selected_bin_column}"
-        df_numericas[faixa_col_name] = pd.cut(df_numericas[selected_bin_column], bins=faixas, right=False, include_lowest=True)
+        df_numericas_2[faixa_col_name] = pd.cut(df_numericas_2[selected_bin_column], bins=faixas, right=False, include_lowest=True)
         
-        frequencia_faixas = df_numericas[faixa_col_name].value_counts().sort_index()
+        frequencia_faixas = df_numericas_2[faixa_col_name].value_counts().sort_index()
         
         st.session_state['faixas'] = faixas
         st.session_state['frequencia_faixas'] = frequencia_faixas
@@ -309,29 +333,31 @@ def exibir_graficos():
         st.pyplot(fig)
 
 
+
     st.divider()
 
+    df2 = df.copy()
     st.subheader("Tabela de Frequência Cruzada")
     cola, colb = st.columns(2)
     
     with cola:
-        col1 = st.selectbox("Selecione a primeira coluna", df.columns.tolist(), key="cross_tab_col1")
+        col1 = st.selectbox("Selecione a primeira coluna", df2.columns.tolist(), key="cross_tab_col1")
     
     with colb:
-        col2 = st.selectbox("Selecione a segunda coluna", df.columns.tolist(), key="cross_tab_col2")
+        col2 = st.selectbox("Selecione a segunda coluna", df2.columns.tolist(), key="cross_tab_col2")
     
     if st.button("Gerar Tabela de Frequência Cruzada", key="generate_cross_tab"):
         st.success(f"Gerando tabela de frequência cruzada para {col1} e {col2}")
         st.write("Proporção com Totais")
-        tabela_frequencias = pd.crosstab(df[col1], df[col2], margins=True, margins_name="Total")
+        tabela_frequencias = pd.crosstab(df2[col1], df2[col2], margins=True, margins_name="Total")
         st.write(tabela_frequencias)
         st.divider()
         st.write("Proporção Percentual")
-        tabela_proporcao = pd.crosstab(df[col1], df[col2], normalize='all')
+        tabela_proporcao = pd.crosstab(df2[col1], df2[col2], normalize='all')
         st.write(tabela_proporcao)
         st.divider()
         st.write("Proporção Percentual por linhas")
-        tabela_proporcao_linhas = pd.crosstab(df[col1], df[col2], normalize='index')
+        tabela_proporcao_linhas = pd.crosstab(df2[col1], df2[col2], normalize='index')
         st.write(tabela_proporcao_linhas)
 
 
@@ -359,21 +385,21 @@ def exibir_graficos():
 
 
     st.divider()
-
+    df_numericas3 = df_numericas.copy()
     st.subheader("Gráfico de Dispersão com Linha de Tendência")
     colc, cold = st.columns(2)
     
     with colc:
-        x_col = st.selectbox("Selecione a coluna para o eixo X", df_numericas.columns.tolist(), key="scatter_x_col")
+        x_col = st.selectbox("Selecione a coluna para o eixo X", df_numericas3.columns.tolist(), key="scatter_x_col")
     
     with cold:
-        y_col = st.selectbox("Selecione a coluna para o eixo Y", df_numericas.columns.tolist(), key="scatter_y_col")
+        y_col = st.selectbox("Selecione a coluna para o eixo Y", df_numericas3.columns.tolist(), key="scatter_y_col")
     
     if st.button("Gerar Gráfico de Dispersão", key="generate_scatter_plot"):
         st.success(f"Gerando gráfico de dispersão para {x_col} e {y_col}")
         
         fig, ax = plt.subplots(figsize=(10, 6))
-        sns.regplot(x=x_col, y=y_col, data=df_numericas, scatter_kws={'s': 50}, line_kws={"color": "red"}, ax=ax)
+        sns.regplot(x=x_col, y=y_col, data=df_numericas3, scatter_kws={'s': 50}, line_kws={"color": "red"}, ax=ax)
         
         plt.title(f'Diagrama de Dispersão entre {x_col} e {y_col} com Linha de Tendência')
         plt.xlabel(x_col)
@@ -387,34 +413,37 @@ def exibir_graficos():
     st.subheader("Análise Bivariada - Boxplot (variável quantitativa / variável qualitativa)")
 
     # Seleção das colunas para os gráficos
-    all_columns = df.columns.tolist()
-    coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", all_columns)
-    coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", all_columns)
-    coluna_x2 = st.selectbox("Selecione a coluna X para o segundo gráfico", all_columns)
-    coluna_y2 = st.selectbox("Selecione a coluna Y para o segundo gráfico", all_columns)
+
+    df1 = df.copy()
+    coluna_x1 = st.selectbox("Selecione a coluna X para o primeiro gráfico", df1.columns.tolist(), key="bivariada_x1")
+    coluna_y1 = st.selectbox("Selecione a coluna Y para o primeiro gráfico", df1.columns.tolist(), key="bivariada_y1")
+    coluna_x2 = st.selectbox("Selecione a coluna X para o segundo gráfico", df1.columns.tolist(), key="bivariada_x2")
+    coluna_y2 = st.selectbox("Selecione a coluna Y para o segundo gráfico", df1.columns.tolist(), key="bivariada_y2")
 
     # Verificar se as colunas foram selecionadas
     if coluna_x1 and coluna_y1 and coluna_x2 and coluna_y2:
-        # Configurando o layout para 1 linha e 2 colunas de gráficos
-        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+        if st.button("Gerar Análise", key="generate_analise"):
+            st.success("Gerando boxplot para a análise")
+            # Configurando o layout para 1 linha e 2 colunas de gráficos
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
-        # Primeiro boxplot
-        sns.boxplot(x=coluna_x1, y=coluna_y1, data=df, ax=axes[0])
-        axes[0].set_title(f'Distribuição de {coluna_y1} por {coluna_x1}')
-        axes[0].set_xlabel(coluna_x1)
-        axes[0].set_ylabel(coluna_y1)
+            # Primeiro boxplot
+            sns.boxplot(x=coluna_x1, y=coluna_y1, data=df1, ax=axes[0])
+            axes[0].set_title(f'Distribuição de {coluna_y1} por {coluna_x1}')
+            axes[0].set_xlabel(coluna_x1)
+            axes[0].set_ylabel(coluna_y1)
 
-        # Segundo boxplot
-        sns.boxplot(x=coluna_x2, y=coluna_y2, data=df, ax=axes[1])
-        axes[1].set_title(f'Distribuição de {coluna_y2} por {coluna_x2}')
-        axes[1].set_xlabel(coluna_x2)
-        axes[1].set_ylabel(coluna_y2)
+            # Segundo boxplot
+            sns.boxplot(x=coluna_x2, y=coluna_y2, data=df1, ax=axes[1])
+            axes[1].set_title(f'Distribuição de {coluna_y2} por {coluna_x2}')
+            axes[1].set_xlabel(coluna_x2)
+            axes[1].set_ylabel(coluna_y2)
 
-        # Ajusta automaticamente os subplots para que caibam no layout
-        plt.tight_layout()
+            # Ajusta automaticamente os subplots para que caibam no layout
+            plt.tight_layout()
 
-        # Exibir os gráficos no Streamlit
-        st.pyplot(fig)
+            # Exibir os gráficos no Streamlit
+            st.pyplot(fig)
 
 
     st.divider()
@@ -423,7 +452,6 @@ def exibir_graficos():
     colunas_selecionadas = []
     colunas_selecionadas  = st.multiselect("Colunas", options=df_numericas.columns.tolist())
             
-
     # Verifica se há colunas selecionadas
     if colunas_selecionadas:
         df_selecionado = df_numericas[colunas_selecionadas]
@@ -435,6 +463,53 @@ def exibir_graficos():
         st.pyplot(plt.gcf())
     else:
         st.warning("Por favor, selecione pelo menos uma coluna para gerar o heatmap.")
+
+
+    st.divider()
+
+    st.subheader("Treemap")
+
+    # Filtrando colunas de texto
+    colunas_texto = df.select_dtypes(include=['object']).columns.tolist()
+
+    # Selecionando as colunas para os valores e rótulos
+    s_size_col = st.selectbox("Selecione a coluna para os valores", df_numericas.columns.tolist(), key="treemap_1")
+    s_label_col = st.selectbox("Selecione a coluna para as características", colunas_texto, key="treemap_2")
+    s_color_col = st.selectbox("Selecione a coluna para as cores", colunas_texto, key="treemap_3")
+
+    if s_size_col and s_label_col and s_color_col:
+        if st.button("Gerar Análise", key="generate_treemap"):
+            st.success("Gerando Treemap")
+            
+            # Obtendo os dados das colunas selecionadas
+            s_size = df[s_size_col].tolist()
+            s_label = df[s_label_col].tolist()
+            s_color = df[s_color_col].tolist()
+            
+            # Verificando se a soma dos tamanhos é zero
+            if sum(s_size) == 0:
+                st.error("A soma dos valores selecionados é zero. Por favor, selecione uma coluna com valores maiores que zero.")
+            else:
+                # Criando a figura
+                fig, ax = plt.subplots(figsize=(12, 8))
+                
+                # Criando um dicionário de cores para as categorias
+                unique_colors = list(set(s_color))
+                color_dict = {category: plt.cm.tab20(i / len(unique_colors)) for i, category in enumerate(unique_colors)}
+                colors = [color_dict[category] for category in s_color]
+                
+                # Criando o gráfico de treemap
+                squarify.plot(sizes=s_size, label=s_label, alpha=.8, ax=ax, color=colors, text_kwargs={'fontsize':6})
+
+                # Adicionando título
+                ax.set_title(f'Distribuição de {s_size_col} por {s_label_col} com cores baseadas em {s_color_col}')
+
+                # Removendo os eixos
+                ax.axis('off')
+
+                # Exibindo o gráfico no Streamlit
+                st.pyplot(fig)
+
 
     
     st.divider()
