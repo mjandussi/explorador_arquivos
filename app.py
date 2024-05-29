@@ -543,7 +543,7 @@ def exibir_graficos():
 
 
 def modelos_probabilisticos():
-    st.header("Modelos Probabilísticos")
+    st.header("Testes de Modelos Probabilísticos")
     
 
     # Título do aplicativo
@@ -594,7 +594,7 @@ def modelos_probabilisticos():
 ###########################################################################################################################################
 
 # Navegação entre páginas
-page = st.sidebar.radio("PÁGINAS", ["Edição do Arquivo", "Análises Estatísticas e Gráficos", "Modelos Probabilísticos"])
+page = st.sidebar.radio("PÁGINAS", ["Edição do Arquivo", "Análises Estatísticas do Arquivo", "Testes de Modelos Probabilísticos"])
 
 # Carregar o DataFrame
 if uploaded_file is not None:
