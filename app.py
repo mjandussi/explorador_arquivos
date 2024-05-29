@@ -4,6 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import squarify
+from scipy.stats import binom
+from scipy.stats import poisson
 
 # Configura para usar o layout amplo
 st.set_page_config(layout="wide")
@@ -536,6 +538,55 @@ def exibir_graficos():
     if st.button("Obrigado!!"):
             st.balloons()
 
+
+
+
+
+def modelos_probabilisticos():
+    st.header("Modelos Probabilísticos")
+    
+
+    # Título do aplicativo
+    st.title("Cálculo de Probabilidades da Distribuição Binomial")
+
+    # Entrada de parâmetros da distribuição binomial
+    n = st.number_input("Número de amostras (n)", min_value=1, value=100, step=1)
+    p = st.number_input("Probabilidade (p) em número decimal", min_value=0.0, max_value=1.0, value=0.50, step=0.01)
+    k = st.number_input("Casos ocorridos (k)", min_value=0, value=1, step=1)
+
+    # Probabilidade de (k) casos ocorrerem
+    prob = binom.pmf(k, n, p)
+
+    # Exibindo os resultados
+    st.subheader("Resultados")
+    if st.button("Cálculo de Probabilidades da Distribuição Binomial", key="generate_binominal"):
+            st.success("Gerando o cálculo")
+            st.write(f"Probabilidade de (k) casos ocorrerem é: {prob:.2%}")
+
+
+    st.divider()
+
+    # Título do aplicativo
+    st.title("Cálculo de Probabilidade da Distribuição de Poisson")
+
+    # Entrada de parâmetros da distribuição de Poisson
+    lambda_param = st.number_input("Taxa média de ocorreência(λ)", min_value=0.0, value=10.0, step=0.1)
+    k = st.number_input("Número de casos (k)", min_value=0, value=5, step=1)
+
+    # Calculando a probabilidade usando a função de massa de probabilidade (PMF) da distribuição de Poisson
+    probabilidade = poisson.pmf(k, lambda_param)
+
+    # Exibindo o resultado
+    st.subheader("Resultado")
+    if st.button("Cálculo de Probabilidades da Distribuição de Poisson", key="generate_poisson"):
+            st.success("Gerando o cálculo")
+            st.write(f"Probabilidade de ocorrência: {probabilidade:.2%}")
+    
+
+
+
+
+
 ###########################################################################################################################################
 ###########################################################################################################################################
 ###########################################################################################################################################
@@ -543,7 +594,7 @@ def exibir_graficos():
 ###########################################################################################################################################
 
 # Navegação entre páginas
-page = st.sidebar.radio("PÁGINAS", ["Edição do Arquivo", "Análises Estatísticas e Gráficos"])
+page = st.sidebar.radio("PÁGINAS", ["Edição do Arquivo", "Análises Estatísticas e Gráficos", "Modelos Probabilísticos"])
 
 # Carregar o DataFrame
 if uploaded_file is not None:
@@ -555,6 +606,13 @@ if uploaded_file is not None:
             editar_dataframe()
         elif page == "Análises Estatísticas e Gráficos":
             exibir_graficos()
+        # elif page == "Modelos Probabilísticos":
+        #     modelos_probabilisticos()
+
+if uploaded_file is None:
+    if page == "Modelos Probabilísticos":
+        modelos_probabilisticos()
+
   
 else:
     st.info("Por favor, carregue um arquivo CSV para começar.")
