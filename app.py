@@ -594,7 +594,7 @@ def modelos_probabilisticos():
 ###########################################################################################################################################
 
 # Navegação entre páginas
-page = st.sidebar.radio("PÁGINAS", ["Edição do Arquivo", "Análises Estatísticas do Arquivo", "Testes de Modelos Probabilísticos"])
+page = st.sidebar.radio("PÁGINAS", ["Arquivo - Edição", "Arquivo - Análises Estatísticas", "Testes de Modelos Probabilísticos"])
 
 # Carregar o DataFrame
 if uploaded_file is not None:
@@ -602,9 +602,9 @@ if uploaded_file is not None:
         st.session_state.df = ler_data(uploaded_file)
     
     if st.session_state.df is not None:
-        if page == "Edição do Arquivo":
+        if page == "Arquivo - Edição":
             editar_dataframe()
-        elif page == "Análises Estatísticas e Gráficos":
+        elif page == "Arquivo - Análises Estatísticas":
             exibir_graficos()
         # elif page == "Modelos Probabilísticos":
         #     modelos_probabilisticos()
