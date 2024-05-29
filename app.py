@@ -610,7 +610,7 @@ if uploaded_file is not None:
         #     modelos_probabilisticos()
 
 if uploaded_file is None:
-    if page == "Modelos Probabilísticos":
+    if page == "Testes de Modelos Probabilísticos":
         modelos_probabilisticos()
 
   
