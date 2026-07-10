@@ -14,28 +14,41 @@ st.set_page_config(page_title="Explorador de Arquivos", page_icon="📊", layout
 hide_st_style = """
 <style>
     #MainMenu, footer {visibility: hidden;}
-    .block-container {padding-top: 2rem; padding-bottom: 3rem; max-width: 1500px;}
-    [data-testid="stSidebar"] {border-right: 1px solid rgba(255,255,255,.12);}
+    .block-container {padding-top: 2rem; padding-bottom: 3rem; max-width: 1440px;}
+    [data-testid="stSidebar"] {
+        border-right: 1px solid #DFE3E8;
+        box-shadow: 2px 0 10px rgba(23,43,77,.04);
+    }
+    h1, h2, h3 {color: #172B4D; letter-spacing: -.02em;}
     [data-testid="stMetric"] {
-        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
-        padding: 1rem; border-radius: 14px;
+        background: #FFFFFF; border: 1px solid #DFE3E8;
+        border-left: 4px solid #1F4E78;
+        padding: 1rem 1.25rem; border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(23,43,77,.05);
     }
     .app-hero {
-        padding: 1.7rem 2rem; border-radius: 18px; margin-bottom: 1.5rem;
-        background: linear-gradient(120deg, #ff6347, #f183cb);
-        box-shadow: 0 10px 30px rgba(0,0,0,.22);
+        padding: 1.6rem 2rem; border-radius: 6px; margin-bottom: 1.5rem;
+        background: #173B5E; border-left: 6px solid #4C9BC7;
+        box-shadow: 0 4px 12px rgba(23,43,77,.12);
     }
-    .app-hero h1 {margin: 0; color: white; font-size: 2.5rem;}
-    .app-hero p {margin: .4rem 0 0; color: rgba(255,255,255,.9);}
-    div.stButton > button, div.stDownloadButton > button {border-radius: 10px;}
+    .app-hero h1 {margin: 0; color: #FFFFFF; font-size: 2.15rem; font-weight: 600;}
+    .app-hero p {margin: .4rem 0 0; color: #DCE9F3; font-size: .98rem;}
+    div.stButton > button, div.stDownloadButton > button {
+        border-radius: 5px; font-weight: 600; min-height: 2.6rem;
+    }
+    [data-testid="stFileUploaderDropzone"] {
+        background: #FFFFFF; border: 1px dashed #8AA4BA; border-radius: 6px;
+    }
+    [data-testid="stDataFrame"] {border: 1px solid #DFE3E8; border-radius: 6px;}
+    hr {border-color: #DFE3E8;}
 </style>
                 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 html_temp = """
 <div class="app-hero">
-    <h1>📊 Explorador de Arquivos</h1>
-    <p>Edite, transforme e analise seus arquivos CSV em um só lugar.</p>
+    <h1>Explorador de Arquivos</h1>
+    <p>Gestão, transformação e análise de dados CSV</p>
 </div>
 """
 st.markdown(html_temp, unsafe_allow_html=True)
@@ -59,6 +72,14 @@ def ler_data(file):
             df = pd.read_csv(io.StringIO(texto), sep=separador)
             if df.empty and len(df.columns) == 0:
                 raise ValueError("O arquivo CSV nao contem dados.")
+            # Alguns relatórios exportam o cabeçalho novamente na primeira linha.
+            # Remove apenas linhas em que a maioria dos valores repete os nomes
+            # das próprias colunas.
+            nomes = pd.Series(df.columns.astype(str), index=df.columns).str.strip()
+            repeticoes = df.astype('string').apply(lambda col: col.str.strip()).eq(nomes, axis=1)
+            linhas_cabecalho = repeticoes.sum(axis=1) >= max(2, len(df.columns) // 2)
+            if linhas_cabecalho.any():
+                df = df.loc[~linhas_cabecalho].reset_index(drop=True)
             st.success(f"Arquivo carregado com sucesso usando a codificação {encoding}!")
             return df
         except Exception as e:
@@ -106,7 +127,14 @@ def editar_dataframe():
         try:
             # Substituir vírgulas por pontos nas colunas selecionadas
             for col in columns_to_convert:
-                df[col] = df[col].str.replace(',', '.').astype(float)
+                # Aceita números brasileiros (1.234,56), moeda e textos inválidos.
+                texto_numerico = (
+                    df[col].astype('string').str.strip()
+                    .str.replace(r'R\$\s*', '', regex=True)
+                    .str.replace('.', '', regex=False)
+                    .str.replace(',', '.', regex=False)
+                )
+                df[col] = pd.to_numeric(texto_numerico, errors='coerce')
             st.success(f"Colunas {columns_to_convert} convertidas para float com sucesso!")
         except ValueError as e:
             st.error(f"Erro ao converter colunas: {e}")
