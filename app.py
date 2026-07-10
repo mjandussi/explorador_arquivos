@@ -4,22 +4,39 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import squarify
+import csv
+import io
 
 # Configura para usar o layout amplo
-st.set_page_config(layout="wide")
+st.set_page_config(page_title="Explorador de Arquivos", page_icon="📊", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
 hide_st_style = """
-                <style>
-                #MainMenu {visibility: hidden;}
-                footer {visibility: hidden;}
-                header {visibility: visible;}
-                </style>
+<style>
+    #MainMenu, footer {visibility: hidden;}
+    .block-container {padding-top: 2rem; padding-bottom: 3rem; max-width: 1500px;}
+    [data-testid="stSidebar"] {border-right: 1px solid rgba(255,255,255,.12);}
+    [data-testid="stMetric"] {
+        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+        padding: 1rem; border-radius: 14px;
+    }
+    .app-hero {
+        padding: 1.7rem 2rem; border-radius: 18px; margin-bottom: 1.5rem;
+        background: linear-gradient(120deg, #ff6347, #f183cb);
+        box-shadow: 0 10px 30px rgba(0,0,0,.22);
+    }
+    .app-hero h1 {margin: 0; color: white; font-size: 2.5rem;}
+    .app-hero p {margin: .4rem 0 0; color: rgba(255,255,255,.9);}
+    div.stButton > button, div.stDownloadButton > button {border-radius: 10px;}
+</style>
                 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 html_temp = """
-<div style="background-color:tomato;"><p style="color:white;font-size:50px;padding:10px">Explorador de Arquivos</p></div>
+<div class="app-hero">
+    <h1>📊 Explorador de Arquivos</h1>
+    <p>Edite, transforme e analise seus arquivos CSV em um só lugar.</p>
+</div>
 """
 st.markdown(html_temp, unsafe_allow_html=True)
 
@@ -29,11 +46,19 @@ uploaded_file = st.file_uploader("Escolha um arquivo CSV", type="csv")
 
 # Função para carregar e processar o DataFrame
 def ler_data(file):
+    conteudo = file.getvalue()
     # Tentar ler o arquivo CSV com diferentes codificações
     encodings = ['utf-8', 'latin1', 'cp1252']
     for encoding in encodings:
         try:
-            df = pd.read_csv(file, encoding=encoding, sep=';')
+            texto = conteudo.decode(encoding)
+            try:
+                separador = csv.Sniffer().sniff(texto[:8192], delimiters=';,\t|').delimiter
+            except csv.Error:
+                separador = ';'
+            df = pd.read_csv(io.StringIO(texto), sep=separador)
+            if df.empty and len(df.columns) == 0:
+                raise ValueError("O arquivo CSV nao contem dados.")
             st.success(f"Arquivo carregado com sucesso usando a codificação {encoding}!")
             return df
         except Exception as e:
@@ -50,6 +75,13 @@ def ler_data(file):
 # Função para exibir e editar o DataFrame
 def editar_dataframe():
     df = st.session_state.df
+
+    st.subheader("Visão geral do arquivo")
+    metrica1, metrica2, metrica3 = st.columns(3)
+    metrica1.metric("Linhas", f"{len(df):,}".replace(',', '.'))
+    metrica2.metric("Colunas", len(df.columns))
+    metrica3.metric("Células vazias", int(df.isna().sum().sum()))
+
     if st.checkbox("Mostrar os dados"):
         number = st.number_input("Número de Linhas para Visualizar", min_value=1, max_value=len(df), value=5)
         st.dataframe(df.head(number))
@@ -152,10 +184,61 @@ def editar_dataframe():
         except Exception as e:
             st.error(f"Erro ao extrair os últimos dígitos: {e}")
 
-    
-    
+    st.divider()
+
+    st.subheader("Juntar duas colunas")
+    st.caption("Crie uma nova coluna combinando os valores de duas colunas existentes.")
+    juntar_col1, juntar_col2 = st.columns(2)
+    with juntar_col1:
+        primeira_coluna = st.selectbox(
+            "Primeira coluna", df.columns.tolist(), key="join_first_column"
+        )
+    with juntar_col2:
+        segunda_coluna = st.selectbox(
+            "Segunda coluna", df.columns.tolist(), key="join_second_column",
+            index=1 if len(df.columns) > 1 else 0
+        )
+
+    nome_coluna, separador_coluna = st.columns([2, 1])
+    with nome_coluna:
+        nova_coluna = st.text_input("Nome da nova coluna", key="join_column_name")
+    with separador_coluna:
+        separador = st.text_input("Separador", value=" - ", key="join_separator")
+
+    if st.button("Juntar colunas", type="primary", key="join_columns_button"):
+        nome_limpo = nova_coluna.strip()
+        if not nome_limpo:
+            st.error("Informe um nome para a nova coluna.")
+        elif nome_limpo in df.columns:
+            st.error("Já existe uma coluna com esse nome. Escolha outro nome.")
+        else:
+            df[nome_limpo] = (
+                df[primeira_coluna].fillna('').astype(str)
+                + separador
+                + df[segunda_coluna].fillna('').astype(str)
+            )
+            st.session_state.df = df
+            st.success(f"Coluna '{nome_limpo}' criada com sucesso!")
+
     # Atualiza o DataFrame no session_state
     st.session_state.df = df
+
+    st.divider()
+    st.subheader("Resultado das edições")
+    st.caption("Esta prévia é atualizada sempre que você transforma o arquivo.")
+    limite_maximo = min(len(df), 500)
+    linhas_preview = st.slider(
+        "Linhas exibidas", min_value=1, max_value=max(1, limite_maximo),
+        value=min(20, max(1, limite_maximo)), key="edited_preview_rows"
+    )
+    st.dataframe(df.head(linhas_preview), use_container_width=True, hide_index=True)
+
+    csv_editado = df.to_csv(index=False, sep=';').encode('utf-8-sig')
+    st.download_button(
+        "⬇️ Baixar CSV editado", data=csv_editado,
+        file_name="arquivo_editado.csv", mime="text/csv",
+        key="download_edited_csv"
+    )
 
 ###########################################################################################################################################
 ###########################################################################################################################################
@@ -547,8 +630,10 @@ page = st.sidebar.radio("PÁGINAS", ["Edição do Arquivo", "Análises Estatíst
 
 # Carregar o DataFrame
 if uploaded_file is not None:
-    if 'df' not in st.session_state:
+    arquivo_id = (uploaded_file.name, uploaded_file.size, hash(uploaded_file.getvalue()))
+    if st.session_state.get('arquivo_id') != arquivo_id or st.session_state.get('df') is None:
         st.session_state.df = ler_data(uploaded_file)
+        st.session_state.arquivo_id = arquivo_id
     
     if st.session_state.df is not None:
         if page == "Edição do Arquivo":
